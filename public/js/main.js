@@ -1,6 +1,7 @@
 (function () {
 
 	var bookmarkTools = bookmarkToolsClosure();
+	var drawItems = drawItemsClosure();
 
 	$("#join-bookmark-btn").click(function(event) {
 		event.preventDefault();
@@ -21,6 +22,23 @@
 		});
 
 		$("#bookmarkjoin").val(JSON.stringify(bookmarkTools.buildJoined()));
+	});
+
+	$("#join-draw-btn").click(function(event) {
+		event.preventDefault();
+
+		drawItems.restart();
+
+		var json1 = JSON.parse($("#draw1").val());
+		var json2 = JSON.parse($("#draw2").val());
+
+		// console.log(json1);
+		// console.log(json2);
+
+		drawItems.addJson(json1);
+		drawItems.addJson(json2);
+
+		$("#drawjoin").val(JSON.stringify(drawItems.getResult()));
 	});
 
 
@@ -77,6 +95,36 @@
 			});
 
 			return jsonRes;
+		}
+	}
+
+	function drawItemsClosure() {
+		var resp = [];
+		
+		return {
+			restart: restart,
+			addJson: addJson,
+			getResult: getResult
+		};
+
+		function restart() {
+			resp = [];
+		}
+
+		function addJson(json) {
+			_.each(json, function (marker) {
+				var duplicate = _.find(resp, function(mrk) {
+					return mrk.color == marker.color
+						&& mrk.latLng.lat == marker.latLng.lat
+						&& mrk.latLng.lng == marker.latLng.lng;
+				});
+
+				if(!duplicate)
+					resp.push(marker);
+			})
+		}
+		function getResult() {
+			return resp;
 		}
 	}
 
