@@ -41,6 +41,32 @@
 		$("#drawjoin").val(JSON.stringify(drawItems.getResult()));
 	});
 
+	$("#fix-bookmark-btn").click(function(event) {
+		event.preventDefault();
+
+		var location = $("#location").val();
+		var json1 = JSON.parse($("#bookFix1").val());
+
+		$("#bookmarkFixRes").val(
+			JSON.stringify(
+				bookmarkTools.cleanJSON(json1, location)
+			)
+		);
+	});
+
+	$("#fix-draw-btn").click(function(event) {
+		event.preventDefault();
+
+		var location = $("#location").val();
+		var json1 = JSON.parse($("#drawFix1").val());
+
+		$("#drawFixRes").val(
+			JSON.stringify(
+				drawItems.cleanJSON(json1, location)
+			)
+		);
+	});
+
 
 	function bookmarkToolsClosure() {
 		var folders = [];
@@ -52,7 +78,8 @@
 		return {
 			restart: restart,
 			addFolder: addFolder,
-			buildJoined: buildJoined
+			buildJoined: buildJoined,
+			cleanJSON: cleanJSON
 		};
 
 		function restart() {
@@ -96,6 +123,28 @@
 
 			return jsonRes;
 		}
+
+
+		function cleanJSON(json, locationStr) {
+			var location = {
+				lat: parseInt(locationStr.split(",")[0]),
+				lng: parseInt(locationStr.split(",")[1])
+			};
+
+			_.each(json.portals, function (folder) {
+				var newBkmk = {};
+				_.each(folder.bkmrk, function (portal, key) {
+					var lat = parseInt(portal.latlng.split(",")[0]);
+					var lng = parseInt(portal.latlng.split(",")[1]);
+					if(Math.abs(lat-location.lat) < 1 &&
+						Math.abs(lng-location.lng) < 1)
+						newBkmk[key] = portal;
+				});
+				folder.bkmrk = newBkmk;
+			});
+
+			return json;
+		}
 	}
 
 	function drawItemsClosure() {
@@ -104,7 +153,8 @@
 		return {
 			restart: restart,
 			addJson: addJson,
-			getResult: getResult
+			getResult: getResult,
+			cleanJSON: cleanJSON
 		};
 
 		function restart() {
@@ -125,6 +175,22 @@
 		}
 		function getResult() {
 			return resp;
+		}
+
+		function cleanJSON(json, locationStr) {
+			var location = {
+				lat: parseInt(locationStr.split(",")[0]),
+				lng: parseInt(locationStr.split(",")[1])
+			};
+
+			var newList = [];
+			_.each(json, function (marker) {
+				if(Math.abs(marker.latLng.lat-location.lat) < 1 &&
+					Math.abs(marker.latLng.lng-location.lng) < 1)
+					newList.push(marker);
+			});
+
+			return newList;
 		}
 	}
 

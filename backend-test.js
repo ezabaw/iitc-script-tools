@@ -4,6 +4,7 @@ var json1 = require("./json1.json");
 var json2 = require("./json2.json");
 
 var folders = [];
+var location = {lng: lat: };
 
 var jsonRes = {
 	maps: {idOthers: {label:"Others",state:1,bkmrk:{}}},
@@ -48,3 +49,20 @@ function addFolder (newFolder) {
 		folders.push(newFolder);
 	}
 }
+
+function cleanJSON(json) {
+	_.each(json.portals, function (folder) {
+		var newBkmk = {};
+		_.each(folder.bkmrk, function (portal, key) {
+			var lat = parseInt(latlng.split(",")[0]);
+			var lng = parseInt(latlng.split(",")[1]);
+			if(Math.abs(lat-location.lat) < 1)
+				newBkmk[key] = portal;
+		});
+		folder.bkmrk = newBkmk;
+	});
+}
+
+
+
+
